@@ -209,7 +209,7 @@ ES는 이 문서들을 색인할 때 다음과 같은 **역색인 테이블**을
 flowchart LR
     subgraph RDB["관계형 DB (PostgreSQL)"]
         direction TB
-        테이블["테이블\n(users)"] --> 행["행 (Row)\n{id:1, name:'Alice'}"]
+        테이블["테이블\n(users)"] --> 행["행 (Row)\n{id:1, name:Alice}"]
         행 --> 열["열 (Column)\nid, name, email..."]
     end
 

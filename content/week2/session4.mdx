@@ -479,7 +479,7 @@ stateDiagram-v2
     [*] --> Mounting: Component Created
     Mounting --> Idle: DOM Rendered\nuseEffect runs
     Idle --> Rendering: State or Props Changed
-    Rendering --> Idle: DOM Updated\nuseEffect cleanup + re-run
+    Rendering --> Idle: DOM Updated\nuseEffect cleanup and re-run
     Idle --> Unmounting: Component Removed
     Unmounting --> [*]: useEffect cleanup runs
 ```

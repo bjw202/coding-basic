@@ -26,7 +26,7 @@ graph TD
 
     subgraph "렌더링 방식"
         F["Server Component\n(기본값)\n데이터 fetch, DB 접근"]
-        G["Client Component\n('use client')\n상호작용, useState, useEffect"]
+        G["Client Component\n(use client)\n상호작용, useState, useEffect"]
     end
 
     F --> |"props 전달"| G
@@ -446,7 +446,7 @@ flowchart TD
 ```mermaid
 flowchart LR
     SC["Server Component\n(default, no directive)\nasync function allowed\nDirect DB/API access"] -->|"fetch data\nbuild time / request time"| DB[(Database\nor External API)]
-    CC["'use client'\nClient Component\nuseState, useEffect\nEvent handlers\nBrowser APIs"] -->|"user interaction\nAPI calls via fetch"| Browser[Browser DOM]
+    CC["use client\nClient Component\nuseState, useEffect\nEvent handlers\nBrowser APIs"] -->|"user interaction\nAPI calls via fetch"| Browser[Browser DOM]
     SC -->|"passes data as props"| CC
 ```
 

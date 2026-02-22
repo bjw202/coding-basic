@@ -209,7 +209,7 @@ sequenceDiagram
     participant A as Node.js App (포트 3000)
 
     C->>N: HTTPS 요청 (TLS 핸드셰이크)
-    Note over N: SSL/TLS 인증서 처리\n(Let's Encrypt)
+    Note over N: SSL/TLS 인증서 처리\n(Lets Encrypt)
     N->>A: HTTP 프록시 요청\n(localhost:3000)
     Note over A: pm2가 프로세스 관리
     A->>N: HTTP 응답 (JSON/HTML)
