@@ -1,0 +1,289 @@
+---
+title: "Python 고급 완전정복"
+description: "비동기 프로그래밍(asyncio), 멀티스레딩, 디자인 패턴, 성능 최적화, 보안까지. 실서비스 운영 수준의 Python을 다룹니다."
+difficulty: "고급"
+---
+
+# Python 고급 완전정복
+
+## 학습 목표
+
+이 자료를 마치면 다음을 할 수 있습니다:
+- asyncio로 비동기 프로그래밍을 구현할 수 있습니다
+- 멀티스레딩과 멀티프로세싱의 차이를 이해하고 적용할 수 있습니다
+- 주요 디자인 패턴을 Python으로 구현할 수 있습니다
+- 성능 최적화와 보안 베스트 프랙티스를 적용할 수 있습니다
+
+전제 조건: Python 중급 완전정복 이수
+
+---
+
+## 1. 비동기 프로그래밍 (asyncio)
+
+### 동기 vs 비동기
+
+```
+동기:  작업1 ████████░░░░░░░  작업2 ████████░░░░░░  → 총 16초
+비동기: 작업1 ████████
+       작업2 ████████
+       작업3 ████████  → 총 8초 (동시에 대기)
+```
+
+```python
+import asyncio
+
+# 비동기 함수 (코루틴) 정의
+async def fetch_data(name, delay):
+    print(f"[{name}] 데이터 요청 중...")
+    await asyncio.sleep(delay)  # 비동기 대기 (I/O 시뮬레이션)
+    print(f"[{name}] 데이터 수신 완료! ({delay}초)")
+    return f"{name}_data"
+
+# 순차 실행 (총 6초)
+async def sequential():
+    result1 = await fetch_data("API1", 2)
+    result2 = await fetch_data("API2", 3)
+    return [result1, result2]
+
+# 병렬 실행 (총 3초, 가장 느린 것만큼)
+async def parallel():
+    results = await asyncio.gather(
+        fetch_data("API1", 2),
+        fetch_data("API2", 3),
+        fetch_data("API3", 1)
+    )
+    return results
+
+asyncio.run(parallel())
+```
+
+### 비동기 HTTP 요청 (aiohttp)
+
+```bash
+pip install aiohttp
+```
+
+```python
+import aiohttp
+import asyncio
+
+async def fetch_url(session, url):
+    async with session.get(url) as response:
+        return await response.json()
+
+async def fetch_multiple():
+    urls = [
+        "https://jsonplaceholder.typicode.com/users/1",
+        "https://jsonplaceholder.typicode.com/users/2",
+        "https://jsonplaceholder.typicode.com/users/3",
+    ]
+
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_url(session, url) for url in urls]
+        results = await asyncio.gather(*tasks)
+    return results
+```
+
+---
+
+## 2. 멀티스레딩과 멀티프로세싱
+
+### 언제 무엇을 사용할까?
+
+| 상황 | 권장 방법 | 이유 |
+|------|---------|------|
+| I/O 바운드 (API 호출, DB 쿼리) | asyncio 또는 ThreadPoolExecutor | GIL의 영향 최소 |
+| CPU 바운드 (계산 집중) | ProcessPoolExecutor | GIL 우회, 병렬 처리 |
+| 간단한 병렬 작업 | concurrent.futures | 추상화된 인터페이스 |
+
+```python
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import time
+
+# I/O 바운드 → 스레드 풀
+def download_file(url):
+    time.sleep(1)  # 네트워크 대기 시뮬레이션
+    return f"Downloaded: {url}"
+
+with ThreadPoolExecutor(max_workers=5) as executor:
+    urls = ["http://example.com/" + str(i) for i in range(10)]
+    results = list(executor.map(download_file, urls))
+
+# CPU 바운드 → 프로세스 풀
+def calculate_prime(n):
+    """소수 판별 (CPU 집중 작업)"""
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+with ProcessPoolExecutor() as executor:
+    numbers = range(1, 10000)
+    primes = list(filter(None, executor.map(calculate_prime, numbers)))
+```
+
+---
+
+## 3. 타입 힌트 (Type Hints)
+
+```python
+from typing import Optional, List, Dict, Union, Any
+from dataclasses import dataclass
+
+# 함수 타입 힌트
+def greet(name: str, age: int = 0) -> str:
+    return f"안녕하세요, {name}({age}세)!"
+
+# Optional 타입
+def find_user(user_id: int) -> Optional[dict]:
+    return users.get(user_id)  # dict 또는 None
+
+# dataclass (자동으로 __init__, __repr__ 생성)
+@dataclass
+class User:
+    name: str
+    email: str
+    age: int = 0
+    is_active: bool = True
+
+user = User("홍길동", "hong@example.com", 30)
+print(user)  # User(name='홍길동', email='hong@example.com', age=30, is_active=True)
+```
+
+---
+
+## 4. 디자인 패턴
+
+### 싱글톤 (Singleton)
+
+```python
+class DatabaseConnection:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.connection = None
+        return cls._instance
+
+    def connect(self, url):
+        if self.connection is None:
+            self.connection = f"Connected to {url}"
+        return self.connection
+
+db1 = DatabaseConnection()
+db2 = DatabaseConnection()
+print(db1 is db2)  # True (같은 인스턴스)
+```
+
+### 옵저버 (Observer)
+
+```python
+class EventEmitter:
+    def __init__(self):
+        self._handlers: Dict[str, List] = {}
+
+    def on(self, event: str, handler):
+        if event not in self._handlers:
+            self._handlers[event] = []
+        self._handlers[event].append(handler)
+
+    def emit(self, event: str, *args, **kwargs):
+        for handler in self._handlers.get(event, []):
+            handler(*args, **kwargs)
+
+emitter = EventEmitter()
+emitter.on('user_created', lambda user: print(f"새 사용자: {user}"))
+emitter.on('user_created', lambda user: send_welcome_email(user))
+emitter.emit('user_created', {'name': '홍길동', 'email': 'hong@example.com'})
+```
+
+---
+
+## 5. 성능 최적화
+
+```python
+import timeit
+from functools import lru_cache
+
+# 메모이제이션으로 피보나치 최적화
+@lru_cache(maxsize=None)
+def fibonacci(n):
+    if n < 2:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# 실행 시간 측정
+print(timeit.timeit(lambda: fibonacci(100), number=1000))
+
+# 제너레이터로 메모리 절약
+def read_large_file(filepath):
+    with open(filepath) as f:
+        for line in f:
+            yield line.strip()
+
+# 슬롯으로 메모리 절약
+class Point:
+    __slots__ = ['x', 'y']  # 딕셔너리 대신 고정 슬롯 사용
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+```
+
+---
+
+## 6. 보안 베스트 프랙티스
+
+```python
+import secrets
+import hashlib
+import hmac
+
+# 안전한 난수 생성
+token = secrets.token_hex(32)          # 64자 hex 토큰
+secret_key = secrets.token_urlsafe(32) # URL 안전 토큰
+
+# 비밀번호 해싱 (실무)
+# pip install bcrypt
+import bcrypt
+
+password = "my_password".encode()
+hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+is_valid = bcrypt.checkpw(password, hashed)
+
+# 환경변수로 시크릿 관리
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY 환경변수가 설정되지 않았습니다")
+
+# 입력 검증
+import re
+
+def validate_email(email: str) -> bool:
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+# 절대 하드코딩 금지
+# BAD
+API_KEY = "sk-abc123..."  # 위험! Git에 노출됨
+
+# GOOD
+API_KEY = os.environ.get("OPENAI_API_KEY")
+```
+
+---
+
+## 핵심 포인트 정리
+
+- asyncio는 I/O 바운드 작업에서 극적인 성능 향상을 제공합니다. API 서버에서 여러 외부 API를 동시에 호출할 때 특히 유용합니다
+- Python의 GIL(Global Interpreter Lock) 때문에 CPU 집중 작업은 멀티스레딩이 아닌 멀티프로세싱을 사용해야 합니다
+- `@lru_cache`는 한 줄로 메모이제이션을 구현할 수 있는 강력한 데코레이터입니다
+- 비밀번호는 반드시 bcrypt 같은 단방향 해시 함수로 저장하고, 절대 평문으로 저장하지 마세요

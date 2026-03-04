@@ -1,0 +1,290 @@
+---
+title: "Python 기초 완전정복"
+description: "Python의 기본 문법부터 조건문, 반복문, 리스트, 딕셔너리, 함수까지. Python을 처음 시작하는 분을 위한 완전 정복 가이드입니다."
+difficulty: "기초"
+---
+
+# Python 기초 완전정복
+
+## 학습 목표
+
+이 자료를 마치면 다음을 할 수 있습니다:
+- Python 기본 문법과 자료형을 이해할 수 있습니다
+- 조건문과 반복문을 작성할 수 있습니다
+- 리스트, 튜플, 딕셔너리를 활용할 수 있습니다
+- 함수를 정의하고 모듈을 사용할 수 있습니다
+
+---
+
+## 1. Python 개요
+
+Python은 "읽기 쉽고, 배우기 쉽고, 강력한 범용 프로그래밍 언어"입니다.
+
+### 왜 Python인가?
+
+| 장점 | 설명 |
+|------|------|
+| 쉬운 문법 | 영어 읽듯 자연스러운 코드 |
+| 빠른 개발 | 적은 코드로 많은 일을 처리 |
+| 거대한 생태계 | 40만+ 패키지 (PyPI) |
+| 높은 수요 | 가장 인기 있는 프로그래밍 언어 |
+
+**활용 분야:** AI/머신러닝, 데이터 분석, 웹 개발(Django/FastAPI), 자동화, 스크립팅
+
+---
+
+## 2. 설치 및 첫 번째 프로그램
+
+```bash
+# macOS (Homebrew)
+brew install python@3.12
+
+# 버전 확인
+python3 --version
+
+# 가상환경 생성 (권장)
+python3 -m venv myenv
+source myenv/bin/activate  # macOS/Linux
+myenv\Scripts\activate     # Windows
+```
+
+```python
+# hello.py
+print("Hello, Python!")
+
+# 실행
+# python3 hello.py
+```
+
+---
+
+## 3. 변수와 자료형
+
+```python
+# 변수 선언 (타입 명시 불필요)
+name = "홍길동"          # str
+age = 25                 # int
+height = 175.5           # float
+is_student = True        # bool
+nothing = None           # NoneType
+
+# 타입 확인
+print(type(name))        # <class 'str'>
+
+# 타입 변환
+num = int("123")         # 문자열 → 정수
+text = str(123)          # 정수 → 문자열
+
+# 다중 할당
+x, y, z = 1, 2, 3
+
+# 변수 교환 (Python만의 깔끔한 문법)
+x, y = y, x
+```
+
+---
+
+## 4. 문자열
+
+```python
+# f-string (Python 3.6+, 권장)
+name = "홍길동"
+age = 25
+print(f"이름: {name}, 나이: {age}")
+
+# 여러 줄 문자열
+multi = """여러 줄
+문자열"""
+
+# 문자열 메서드
+text = "Hello, Python!"
+print(text.upper())              # "HELLO, PYTHON!"
+print(text.lower())              # "hello, python!"
+print(text.strip())              # 앞뒤 공백 제거
+print(text.replace("Python", "World"))  # "Hello, World!"
+print(text.split(", "))          # ["Hello", "Python!"]
+print(", ".join(["a", "b", "c"])) # "a, b, c"
+print(len(text))                 # 15
+print("Python" in text)          # True
+```
+
+---
+
+## 5. 조건문
+
+```python
+age = 20
+
+if age >= 18:
+    print("성인입니다")
+elif age >= 13:
+    print("청소년입니다")
+else:
+    print("어린이입니다")
+
+# 한 줄 조건문 (삼항 연산자)
+status = "성인" if age >= 18 else "미성년자"
+
+# 논리 연산자
+if age >= 18 and age < 65:
+    print("근로 가능 연령")
+
+if name == "홍길동" or name == "김철수":
+    print("등록된 사용자")
+```
+
+---
+
+## 6. 반복문
+
+```python
+# for 반복문
+fruits = ["사과", "바나나", "오렌지"]
+for fruit in fruits:
+    print(fruit)
+
+# range
+for i in range(5):       # 0, 1, 2, 3, 4
+    print(i)
+
+for i in range(1, 6):    # 1, 2, 3, 4, 5
+    print(i)
+
+# enumerate (인덱스와 값 동시에)
+for i, fruit in enumerate(fruits):
+    print(f"{i}: {fruit}")
+
+# while 반복문
+count = 0
+while count < 5:
+    print(count)
+    count += 1
+
+# break, continue
+for i in range(10):
+    if i == 3:
+        continue   # 3은 건너뜀
+    if i == 7:
+        break      # 7에서 종료
+    print(i)
+```
+
+---
+
+## 7. 리스트 (List)
+
+```python
+fruits = ["사과", "바나나", "오렌지"]
+
+# 기본 조작
+fruits.append("포도")      # 끝에 추가
+fruits.insert(1, "키위")   # 특정 위치에 삽입
+fruits.remove("바나나")    # 값으로 제거
+popped = fruits.pop()      # 마지막 제거 및 반환
+fruits.sort()              # 정렬
+fruits.reverse()           # 뒤집기
+
+# 슬라이싱
+numbers = [0, 1, 2, 3, 4, 5]
+print(numbers[1:4])    # [1, 2, 3]
+print(numbers[:3])     # [0, 1, 2]
+print(numbers[::2])    # [0, 2, 4] (2씩 건너뜀)
+print(numbers[::-1])   # [5, 4, 3, 2, 1, 0] (뒤집기)
+
+# 리스트 컴프리헨션 (Python의 강력한 기능)
+squares = [n**2 for n in range(1, 6)]  # [1, 4, 9, 16, 25]
+evens = [n for n in range(10) if n % 2 == 0]  # [0, 2, 4, 6, 8]
+```
+
+---
+
+## 8. 딕셔너리 (Dictionary)
+
+```python
+user = {
+    "name": "홍길동",
+    "age": 30,
+    "email": "hong@example.com"
+}
+
+# 접근
+print(user["name"])                   # "홍길동"
+print(user.get("phone", "없음"))     # "없음" (키 없을 때 기본값)
+
+# 수정
+user["age"] = 31
+user["phone"] = "010-1234-5678"
+
+# 반복
+for key, value in user.items():
+    print(f"{key}: {value}")
+
+# 딕셔너리 컴프리헨션
+squares = {n: n**2 for n in range(1, 6)}
+# {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+```
+
+---
+
+## 9. 함수
+
+```python
+# 기본 함수 정의
+def greet(name, greeting="안녕하세요"):
+    return f"{greeting}, {name}!"
+
+print(greet("홍길동"))           # "안녕하세요, 홍길동!"
+print(greet("김철수", "반가워요")) # "반가워요, 김철수!"
+
+# 가변 인자
+def sum_all(*args):
+    return sum(args)
+
+sum_all(1, 2, 3, 4, 5)  # 15
+
+# 키워드 인자
+def create_user(**kwargs):
+    return kwargs
+
+create_user(name="홍길동", age=30)
+# {'name': '홍길동', 'age': 30}
+```
+
+---
+
+## 10. 모듈과 패키지
+
+```python
+# 표준 라이브러리 사용
+import os
+import json
+import datetime
+from pathlib import Path
+
+# 현재 디렉토리
+print(os.getcwd())
+
+# JSON 처리
+data = {"name": "홍길동", "age": 30}
+json_str = json.dumps(data, ensure_ascii=False, indent=2)
+parsed = json.loads(json_str)
+
+# 날짜/시간
+now = datetime.datetime.now()
+print(now.strftime("%Y-%m-%d %H:%M"))
+
+# pip로 외부 패키지 설치
+# pip install requests
+import requests
+response = requests.get("https://api.example.com/data")
+data = response.json()
+```
+
+---
+
+## 핵심 포인트 정리
+
+- Python은 들여쓰기가 코드 구조를 결정합니다. 일관된 들여쓰기(보통 4칸)가 필수입니다
+- 리스트 컴프리헨션은 Python의 강력한 기능입니다. `[표현식 for 변수 in 이터러블 if 조건]`
+- `get()` 메서드로 딕셔너리 값을 안전하게 접근하면 KeyError를 방지할 수 있습니다
+- 가상환경(venv)을 사용하면 프로젝트마다 다른 패키지 버전을 격리할 수 있습니다

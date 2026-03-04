@@ -1,0 +1,24 @@
+{
+  "name": "vibeclass-coding-1-month",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vibe Coding 1-Month Bootcamp Documentation Site",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "nextra": "^4.6.0",
+    "nextra-theme-docs": "^4.6.0",
+    "playwright": "^1.58.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.0.0"
+  }
+}

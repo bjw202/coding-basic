@@ -1,0 +1,244 @@
+---
+title: "ORM 실전가이드"
+description: "Raw SQL, 쿼리 빌더, ORM 비교부터 Prisma로 실전 CRUD, 관계 설정, 마이그레이션까지. Node.js에서 데이터베이스를 다루는 모든 방법을 정리합니다."
+difficulty: "중급"
+---
+
+# ORM 실전가이드
+
+## 학습 목표
+
+이 자료를 마치면 다음을 할 수 있습니다:
+- Raw SQL, 쿼리 빌더, ORM의 차이를 이해하고 상황에 맞게 선택할 수 있습니다
+- Prisma로 스키마를 정의하고 CRUD 작업을 구현할 수 있습니다
+- 관계(1:1, 1:N, N:M)를 Prisma로 설정할 수 있습니다
+- 마이그레이션을 안전하게 관리할 수 있습니다
+
+---
+
+## 1. 3가지 방식 비교
+
+```
+Node.js 애플리케이션
+  ├── Raw SQL (직접 작성)
+  │   └── mysql2, pg → SQL 문자열 → MySQL/PostgreSQL
+  │
+  ├── 쿼리 빌더 (JavaScript로 SQL 생성)
+  │   └── Knex.js → JS → SQL 변환 → 여러 DB
+  │
+  └── ORM (객체로 DB 조작)
+      └── Prisma, Drizzle → 모델 → SQL → 여러 DB
+```
+
+| 방식 | 예시 | SQL 작성 | 학습 난이도 | 유연성 |
+|------|------|---------|-----------|--------|
+| Raw SQL | mysql2, pg | 직접 작성 | 낮음 (SQL 알아야 함) | 매우 높음 |
+| 쿼리 빌더 | Knex.js | JS로 조합 | 중간 | 높음 |
+| ORM | Prisma, Drizzle | 자동 생성 | 중간 | 중간 |
+
+---
+
+## 2. Raw SQL 방식
+
+```bash
+npm install mysql2
+# 또는
+npm install pg
+```
+
+```javascript
+import mysql from 'mysql2/promise'
+
+// 커넥션 풀 생성 (권장)
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: 'password',
+  database: 'myapp',
+  waitForConnections: true,
+  connectionLimit: 10
+})
+
+// 쿼리 실행
+const [users] = await pool.execute('SELECT * FROM users WHERE active = ?', [true])
+const [result] = await pool.execute(
+  'INSERT INTO users (name, email) VALUES (?, ?)',
+  ['홍길동', 'hong@example.com']
+)
+console.log('삽입된 ID:', result.insertId)
+```
+
+---
+
+## 3. Prisma 실전 가이드
+
+### 설치 및 초기화
+
+```bash
+npm install prisma @prisma/client
+npx prisma init  # prisma/schema.prisma 생성
+```
+
+### 스키마 정의
+
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      Role     @default(USER)
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+```
+
+---
+
+## 4. Prisma CRUD 완전정복
+
+```javascript
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+
+// CREATE
+const user = await prisma.user.create({
+  data: {
+    name: '홍길동',
+    email: 'hong@example.com',
+    role: 'ADMIN'
+  }
+})
+
+// READ
+const users = await prisma.user.findMany({
+  where: { role: 'USER' },
+  orderBy: { createdAt: 'desc' },
+  take: 10,    // LIMIT
+  skip: 20,    // OFFSET
+  select: {
+    id: true,
+    name: true,
+    email: true
+    // password: false (민감 정보 제외)
+  }
+})
+
+// READ 단일
+const user = await prisma.user.findUnique({ where: { email: 'hong@example.com' } })
+const userOrNull = await prisma.user.findFirst({ where: { name: '홍길동' } })
+
+// UPDATE
+const updated = await prisma.user.update({
+  where: { id: 1 },
+  data: { name: '김철수' }
+})
+
+// UPSERT (있으면 update, 없으면 create)
+const upserted = await prisma.user.upsert({
+  where: { email: 'hong@example.com' },
+  update: { name: '홍길동2' },
+  create: { email: 'hong@example.com', name: '홍길동' }
+})
+
+// DELETE
+await prisma.user.delete({ where: { id: 1 } })
+```
+
+---
+
+## 5. 관계(Relation) 다루기
+
+```javascript
+// 관계 데이터 함께 조회 (include)
+const userWithPosts = await prisma.user.findUnique({
+  where: { id: 1 },
+  include: {
+    posts: {
+      where: { published: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5
+    }
+  }
+})
+
+// 관계 데이터 함께 생성
+const userWithPost = await prisma.user.create({
+  data: {
+    name: '홍길동',
+    email: 'hong@example.com',
+    posts: {
+      create: [
+        { title: '첫 번째 글', content: '내용입니다' }
+      ]
+    }
+  },
+  include: { posts: true }
+})
+```
+
+---
+
+## 6. 마이그레이션
+
+```bash
+# 마이그레이션 생성
+npx prisma migrate dev --name add_user_role
+
+# 프로덕션 마이그레이션 적용
+npx prisma migrate deploy
+
+# Prisma Studio (GUI로 DB 확인)
+npx prisma studio
+
+# 클라이언트 재생성 (스키마 변경 후)
+npx prisma generate
+```
+
+---
+
+## 7. ORM vs 쿼리빌더 vs Raw SQL 선택 가이드
+
+| 상황 | 추천 |
+|------|------|
+| 새 프로젝트, TypeScript 사용 | Prisma |
+| 복잡한 조인/집계가 많음 | Raw SQL 또는 Knex.js |
+| 빠른 프로토타이핑 | Prisma |
+| 레거시 DB 스키마 | Knex.js 또는 Raw SQL |
+| 여러 DB를 지원해야 함 | Prisma (멀티 DB 지원) |
+
+---
+
+## 핵심 포인트 정리
+
+- Prisma의 스키마 파일은 DB 구조의 단일 진실 공급원(Single Source of Truth)입니다. 스키마를 먼저 설계하고 마이그레이션으로 DB에 반영하세요
+- `findUnique`는 없으면 null, `findUniqueOrThrow`는 없으면 에러를 던집니다. 상황에 맞게 선택하세요
+- `select`로 필요한 필드만 가져오면 성능이 향상됩니다. 특히 비밀번호 같은 민감 정보를 실수로 반환하는 것을 방지합니다
+- 트랜잭션이 필요한 경우: `await prisma.$transaction([...])`을 사용하세요

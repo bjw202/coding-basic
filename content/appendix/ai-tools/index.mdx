@@ -1,0 +1,44 @@
+---
+title: "AI 도구 마스터리"
+description: "Claude Code 명령어부터 프롬프트 엔지니어링, CLAUDE.md 작성, AI 코딩 운영 규칙까지 AI 도구 활용의 모든 것을 다룹니다."
+---
+
+# AI 도구 마스터리
+
+Claude Code를 비롯한 AI 코딩 도구를 제대로 활용하려면 도구 자체보다 "어떻게 지시하느냐"가 핵심입니다. 이 섹션에서는 실전에서 바로 쓸 수 있는 명령어, 프롬프트 패턴, 팀 운영 규칙, 그리고 AI 사고를 방지하는 체크리스트까지 모두 다룹니다.
+
+## 어떤 세션 다음에 읽을까?
+
+| 세션 | 추천 자료 | 이유 |
+|------|----------|------|
+| Session 1 이후 | [Claude Code 필수 명령어](/appendix/ai-tools/claude-code-commands) | 개발환경 세팅 후 AI 도구를 즉시 활용할 수 있습니다 |
+| Session 3 이후 | [HTTP 프롬프트 매핑표](/appendix/ai-tools/http-prompt-mapping) | HTTP 개념을 AI 프롬프트로 바로 적용할 수 있습니다 |
+| Session 9 이후 | [AI 코딩 운영 규칙](/appendix/ai-tools/ai-coding-rules) | AI API 통합 후 운영 보안을 점검합니다 |
+| 전 과정 완료 후 | [고급 프롬프트 100선](/appendix/ai-tools/prompts-100-advanced), [CLAUDE.md 작성법](/appendix/ai-tools/claude-md-guide) | AI 활용을 전문가 수준으로 끌어올립니다 |
+
+## 자료 목록
+
+### 명령어와 프롬프트
+
+- **[Claude Code 필수 명령어](/appendix/ai-tools/claude-code-commands)** — 설치부터 바이브코딩 워크플로우까지. Claude Code를 터미널에서 효과적으로 사용하는 방법을 정리합니다.
+- **[실전 프롬프트 50선](/appendix/ai-tools/prompts-50)** — 프로젝트 이해, 리팩토링, 기능 추가, 버그 수정 등 상황별로 바로 복붙해서 쓸 수 있는 프롬프트 50가지입니다.
+- **[고급 프롬프트 100선](/appendix/ai-tools/prompts-100-advanced)** — 운영 환경을 다루는 시니어 개발자 수준의 프롬프트 100가지. 아키텍처 검토, 성능 최적화, 보안 점검까지 다룹니다.
+
+### CLAUDE.md 작성
+
+- **[CLAUDE.md 작성법](/appendix/ai-tools/claude-md-guide)** — AI 코딩 도구가 레포지토리에서 따라야 할 규칙을 정의하는 방법. API 계약 보호, 보안 규칙, 테스트 원칙을 명문화합니다.
+- **[규모별 CLAUDE.md](/appendix/ai-tools/claude-md-by-scale)** — 1인 SaaS, 스타트업, 엔터프라이즈 규모별로 AI 코딩 규칙의 강도를 어떻게 조절해야 하는지 비교합니다.
+
+### 운영과 안전
+
+- **[AI 코딩 운영 규칙](/appendix/ai-tools/ai-coding-rules)** — 실서비스 운영 환경에서 Claude Code / Cursor / Copilot을 안전하게 사용하는 방법. 사고 사례와 방지 전략을 포함합니다.
+- **[AI 사고 분석집](/appendix/ai-tools/ai-thinking-analysis)** — 실제 장애 로그를 기준으로 AI 프롬프트 문제를 분석합니다. 로그인 오류, API 계약 파괴, 성능 장애, 보안 취약점 사례를 다룹니다.
+- **[코드리뷰 체크리스트](/appendix/ai-tools/code-review-checklist)** — AI가 만든 변경을 사람이 안전하게 검증하는 PR 템플릿. 범위 확인부터 보안, 성능, 배포 안전까지 9가지 체크 항목을 제공합니다.
+- **[HTTP 프롬프트 매핑표](/appendix/ai-tools/http-prompt-mapping)** — HTTP 메서드, 상태 코드, 인증, CORS 등 네트워크 용어를 바로 Claude 프롬프트로 변환하는 실전 표입니다.
+
+## 핵심 포인트 정리
+
+- AI 도구는 "자동 코딩기"가 아니라 함께 일하는 시니어 개발자입니다. 지시는 명확하게, 범위는 좁게, 검증은 사람이 해야 합니다.
+- 프롬프트의 품질이 코드의 품질을 결정합니다. "더 좋게 해줘" 같은 추상적 표현은 사고를 유발합니다.
+- CLAUDE.md는 팀의 규칙서입니다. 규모가 커질수록 더 명확한 규칙이 필요합니다.
+- 모든 AI 코드 변경은 `git diff`로 직접 검증하고, 테스트를 통과한 뒤에만 배포합니다.

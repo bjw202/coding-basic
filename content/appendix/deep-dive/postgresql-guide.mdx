@@ -1,0 +1,222 @@
+---
+title: "PostgreSQL 기초"
+description: "PostgreSQL의 특징과 MySQL과의 차이점, JSON 타입, 고급 쿼리, Supabase 연동까지. 프로덕션에서 널리 쓰이는 강력한 오픈소스 DB를 다룹니다."
+difficulty: "중급"
+---
+
+# PostgreSQL 기초
+
+## 학습 목표
+
+이 자료를 마치면 다음을 할 수 있습니다:
+- PostgreSQL의 특징과 MySQL과의 차이를 이해할 수 있습니다
+- 데이터베이스, 스키마, 테이블을 생성하고 관리할 수 있습니다
+- PostgreSQL 전용 데이터 타입(JSONB, 배열 등)을 활용할 수 있습니다
+- Supabase와 함께 사용할 수 있습니다
+
+---
+
+## 1. PostgreSQL 개요
+
+PostgreSQL은 "세계에서 가장 진보된 오픈소스 관계형 데이터베이스"입니다.
+
+### 왜 PostgreSQL인가?
+
+| 장점 | 설명 |
+|------|------|
+| SQL 표준 준수 | 가장 표준에 가까운 SQL 구현 |
+| 고급 데이터 타입 | JSON, 배열, 범위, 벡터 등 |
+| MVCC | 읽기/쓰기 간섭 없는 동시 처리 |
+| 무료 & 제한 없음 | 상용 기능도 모두 무료 |
+| 확장 시스템 | pgvector, PostGIS 등 수백 개 확장 |
+
+### PostgreSQL이 강한 분야
+
+- 금융/핀테크: ACID 트랜잭션, 정밀 계산
+- 데이터 분석: 윈도우 함수, CTE
+- AI/벡터 검색: pgvector 확장
+- BaaS 플랫폼: Supabase 기반
+- 엔터프라이즈: 복잡한 비즈니스 로직
+
+---
+
+## 2. 설치 및 접속
+
+```bash
+# macOS (Homebrew)
+brew install postgresql@16
+brew services start postgresql@16
+
+# 접속
+psql -U postgres
+psql -U postgres -d myapp
+```
+
+---
+
+## 3. MySQL과 다른 점
+
+| 항목 | MySQL | PostgreSQL |
+|------|-------|-----------|
+| 대소문자 구분 | 기본적으로 없음 | 식별자는 소문자 |
+| AUTO_INCREMENT | `AUTO_INCREMENT` | `SERIAL` 또는 `GENERATED ALWAYS AS IDENTITY` |
+| boolean | TINYINT(1) | BOOLEAN (네이티브) |
+| JSON | JSON | JSON, JSONB (바이너리, 권장) |
+| 배열 | 지원 안 함 | 네이티브 지원 |
+
+---
+
+## 4. 기본 사용
+
+```sql
+-- 데이터베이스 생성 및 사용
+CREATE DATABASE myapp;
+\c myapp  -- psql에서 데이터베이스 전환
+
+-- 테이블 생성 (PostgreSQL 스타일)
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,  -- 또는 GENERATED ALWAYS AS IDENTITY
+  name VARCHAR(50) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  age INTEGER,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()  -- 타임존 포함 권장
+);
+```
+
+---
+
+## 5. PostgreSQL 전용 데이터 타입
+
+### JSONB (JSON 바이너리)
+
+```sql
+-- JSONB 타입 사용
+ALTER TABLE users ADD COLUMN settings JSONB DEFAULT '{}';
+
+-- JSON 데이터 삽입
+UPDATE users SET settings = '{"theme": "dark", "notifications": true}' WHERE id = 1;
+
+-- JSON 필드 조회
+SELECT name, settings->>'theme' as theme FROM users;
+
+-- JSON 필드 조건
+SELECT * FROM users WHERE settings->>'theme' = 'dark';
+
+-- JSON 필드 업데이트
+UPDATE users SET settings = settings || '{"language": "ko"}' WHERE id = 1;
+
+-- JSONB 인덱스
+CREATE INDEX idx_users_settings ON users USING GIN (settings);
+```
+
+### 배열 타입
+
+```sql
+-- 배열 타입 사용
+CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  title TEXT,
+  tags TEXT[]  -- 배열
+);
+
+-- 배열 삽입
+INSERT INTO posts (title, tags) VALUES ('첫 글', ARRAY['tech', 'javascript']);
+
+-- 배열 조건 (포함 여부)
+SELECT * FROM posts WHERE 'tech' = ANY(tags);
+SELECT * FROM posts WHERE tags @> ARRAY['tech'];
+```
+
+---
+
+## 6. 고급 쿼리 기능
+
+### CTE (Common Table Expression)
+
+```sql
+-- WITH 절로 복잡한 쿼리 단순화
+WITH active_users AS (
+  SELECT * FROM users WHERE is_active = true
+),
+user_stats AS (
+  SELECT user_id, COUNT(*) as order_count
+  FROM orders
+  GROUP BY user_id
+)
+SELECT u.name, us.order_count
+FROM active_users u
+JOIN user_stats us ON u.id = us.user_id;
+```
+
+### 윈도우 함수
+
+```sql
+-- 순위 매기기
+SELECT
+  name,
+  score,
+  RANK() OVER (ORDER BY score DESC) as rank,
+  ROW_NUMBER() OVER (ORDER BY score DESC) as row_num
+FROM students;
+
+-- 누적 합계
+SELECT
+  date,
+  amount,
+  SUM(amount) OVER (ORDER BY date) as cumulative_sum
+FROM sales;
+```
+
+---
+
+## 7. Supabase와 함께 쓰기
+
+Supabase는 PostgreSQL 기반의 BaaS(Backend as a Service)입니다.
+
+```bash
+npm install @supabase/supabase-js
+```
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+)
+
+// 데이터 조회
+const { data: users, error } = await supabase
+  .from('users')
+  .select('*')
+  .eq('is_active', true)
+  .order('created_at', { ascending: false })
+  .limit(10)
+
+// 데이터 삽입
+const { data, error: insertError } = await supabase
+  .from('users')
+  .insert({ name: '홍길동', email: 'hong@example.com' })
+  .select()
+  .single()
+
+// 실시간 구독
+const channel = supabase
+  .channel('users-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, (payload) => {
+    console.log('변경 감지:', payload)
+  })
+  .subscribe()
+```
+
+> **Session 7 연결**: 7회차에서 배우는 PostgreSQL/Supabase 연동이 이 패턴을 기반으로 합니다.
+
+---
+
+## 핵심 포인트 정리
+
+- PostgreSQL은 `TIMESTAMPTZ`(타임존 포함)를 `TIMESTAMP` 대신 사용하는 것을 권장합니다
+- JSONB는 JSON 데이터를 바이너리로 저장해 조회가 훨씬 빠릅니다. JSON 대신 JSONB를 사용하세요
+- CTE(`WITH` 절)를 사용하면 복잡한 쿼리를 가독성 있게 단계별로 작성할 수 있습니다
+- Supabase는 PostgreSQL을 백엔드 없이 사용할 수 있게 해주는 강력한 도구입니다

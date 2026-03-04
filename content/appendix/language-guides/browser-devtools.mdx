@@ -1,0 +1,209 @@
+---
+title: "브라우저 개발자 도구"
+description: "Chrome DevTools를 활용한 웹 디버깅 완전 가이드. Console, Elements, Sources, Network, Application 패널을 실전에서 활용하는 방법을 다룹니다."
+---
+
+# 브라우저 개발자 도구
+
+## 학습 목표
+
+이 자료를 마치면 다음을 할 수 있습니다:
+- Chrome DevTools의 주요 패널을 자유롭게 사용할 수 있습니다
+- JavaScript 에러를 Console에서 즉시 진단할 수 있습니다
+- Network 패널로 API 요청과 응답을 분석할 수 있습니다
+- 중단점(Breakpoint)을 사용해 코드를 단계별로 디버깅할 수 있습니다
+
+---
+
+## 1. 개발자 도구 열기
+
+| 운영체제 | 단축키 |
+|---------|--------|
+| Windows/Linux | `F12` 또는 `Ctrl + Shift + I` |
+| Mac | `Cmd + Option + I` |
+| 특정 요소 검사 | 우클릭 → "검사" (Inspect) |
+
+도킹 위치 변경: DevTools 우측 상단 `⋮` 메뉴 → Dock side
+
+---
+
+## 2. Console 패널
+
+### 기본 출력 메서드
+
+```javascript
+console.log('일반 메시지');
+console.info('정보 메시지');    // 파란색 아이콘
+console.warn('경고 메시지');    // 노란색 배경
+console.error('에러 메시지');   // 빨간색 배경
+```
+
+### 고급 출력
+
+```javascript
+// 객체를 테이블로 표시
+const users = [
+  { name: '김철수', age: 25, city: '서울' },
+  { name: '이영희', age: 30, city: '부산' },
+];
+console.table(users);
+
+// 실행 시간 측정
+console.time('작업 시간');
+// ... 코드 실행 ...
+console.timeEnd('작업 시간');  // "작업 시간: 1234.56ms"
+
+// 그룹화된 로그
+console.group('사용자 정보');
+console.log('이름: 김철수');
+console.log('나이: 25');
+console.groupEnd();
+```
+
+### Console에서 직접 코드 실행
+
+DevTools Console에서 현재 페이지의 JavaScript를 직접 실행할 수 있습니다:
+
+```javascript
+// 페이지의 모든 링크 가져오기
+document.querySelectorAll('a').length
+
+// localStorage 확인
+JSON.parse(localStorage.getItem('user'))
+
+// API 직접 호출
+const res = await fetch('/api/users')
+const data = await res.json()
+console.table(data)
+```
+
+---
+
+## 3. Elements 패널
+
+Elements 패널에서 HTML 구조와 CSS를 실시간으로 수정할 수 있습니다.
+
+### CSS 셀렉터 테스트
+
+Console에서 CSS 셀렉터를 테스트할 수 있습니다:
+
+```javascript
+// 요소 선택
+document.querySelector('.btn-primary')
+document.querySelectorAll('input[type="email"]')
+
+// 요소 스타일 변경
+document.querySelector('h1').style.color = 'red'
+```
+
+### 유용한 단축키
+
+| 단축키 | 기능 |
+|--------|------|
+| `H` | 선택된 요소 숨기기/보이기 |
+| `Delete` | 선택된 요소 삭제 |
+| `Ctrl + Z` | 변경 취소 |
+
+---
+
+## 4. Sources 패널 - 중단점 디버깅
+
+Sources 패널에서 JavaScript 코드를 단계별로 실행할 수 있습니다.
+
+### 중단점(Breakpoint) 설정
+
+1. Sources 탭에서 파일 열기
+2. 라인 번호 클릭 → 파란 점이 생기면 중단점 설정 완료
+3. 페이지 동작 실행 → 해당 라인에서 실행 멈춤
+
+### 디버깅 컨트롤
+
+| 버튼 | 단축키 | 기능 |
+|------|--------|------|
+| Resume | F8 | 다음 중단점까지 실행 |
+| Step Over | F10 | 현재 라인 실행 (함수 내부 진입 안 함) |
+| Step Into | F11 | 함수 내부로 진입 |
+| Step Out | Shift+F11 | 현재 함수 탈출 |
+
+---
+
+## 5. Network 패널
+
+Network 패널에서 모든 HTTP 요청과 응답을 볼 수 있습니다.
+
+### 사용법
+
+1. Network 탭 열기
+2. 페이지 새로고침 또는 액션 실행
+3. 요청 목록에서 클릭 → 상세 정보 확인
+
+### 요청 정보 확인
+
+- **Headers**: 요청/응답 헤더 (Authorization 토큰, Content-Type 등)
+- **Payload**: 요청 바디 (POST/PUT 전송 데이터)
+- **Response**: 응답 내용 (JSON 데이터)
+- **Timing**: 각 단계별 소요 시간
+
+### API 호출 디버깅
+
+```javascript
+// Network 패널에서 실패한 요청을 우클릭 → Copy as cURL
+// 터미널에서 그대로 붙여넣어 API 직접 테스트
+curl 'https://api.example.com/users' \
+  -H 'Authorization: Bearer token123'
+```
+
+---
+
+## 6. Application 패널 - 스토리지
+
+### localStorage
+
+```javascript
+// 데이터 저장
+localStorage.setItem('user', JSON.stringify({ name: '홍길동' }))
+
+// 데이터 읽기
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 삭제
+localStorage.removeItem('user')
+localStorage.clear()
+```
+
+### sessionStorage vs localStorage
+
+| 구분 | localStorage | sessionStorage |
+|------|-------------|----------------|
+| 유지 기간 | 직접 삭제 전까지 | 탭/창 닫으면 삭제 |
+| 용도 | 로그인 상태 유지 | 임시 데이터 |
+
+---
+
+## 7. 실전 디버깅 기법
+
+### 에러 추적
+
+```javascript
+// 에러 발생 시 자동으로 중단하려면:
+// Sources → Pause on exceptions (오른쪽 패널의 ⏸ 아이콘)
+
+// 조건부 중단점: 중단점 우클릭 → Edit breakpoint
+// 조건 예시: userId === 42
+```
+
+### XHR/Fetch 중단점
+
+```
+Sources → XHR/Fetch Breakpoints → + 버튼
+URL에 특정 문자열 포함 시 자동 중단
+```
+
+---
+
+## 핵심 포인트 정리
+
+- Console에서 `console.table()`을 쓰면 배열 데이터를 훨씬 읽기 쉽게 볼 수 있습니다
+- Network 패널에서 실패한 API 요청을 "Copy as cURL"로 복사하면 터미널에서 직접 테스트할 수 있습니다
+- 중단점(Breakpoint)을 설정하면 `console.log` 없이도 코드 실행 중에 변수 값을 확인할 수 있습니다
+- Application 패널에서 localStorage, 쿠키, 세션 데이터를 직접 수정해가며 테스트할 수 있습니다

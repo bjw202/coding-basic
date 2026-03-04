@@ -477,9 +477,9 @@ flowchart LR
 ```mermaid
 stateDiagram-v2
     [*] --> Mounting: Component Created
-    Mounting --> Idle: DOM Rendered\nuseEffect runs
+    Mounting --> Idle: DOM Rendered, useEffect runs
     Idle --> Rendering: State or Props Changed
-    Rendering --> Idle: DOM Updated\nuseEffect cleanup and re-run
+    Rendering --> Idle: DOM Updated, useEffect cleanup and re-run
     Idle --> Unmounting: Component Removed
     Unmounting --> [*]: useEffect cleanup runs
 ```
@@ -668,3 +668,11 @@ const displayedProducts = products
 **핵심 키워드:** Component, JSX, Props, State, useState, useEffect, 리스트 렌더링, key, 이벤트 핸들링, 조건부 렌더링
 
 **다음 회차 미리보기:** 5회차에서는 React를 기반으로 하는 Next.js 프레임워크를 배웁니다. 파일 하나를 만들면 자동으로 페이지가 생성되는 App Router와, 서버에서 직접 데이터를 가져오는 Server Component, 그리고 백엔드 없이도 API를 만들 수 있는 Route Handler를 다룹니다.
+
+---
+
+## 강사 자료
+
+이 세션 내용을 더 깊이 이해하고 싶다면 아래 자료를 참고하세요.
+
+- [JavaScript 완전 가이드](/appendix/language-guides/javascript-complete): React 이해에 필요한 JS 심화 개념(클로저, 프로토타입, 비동기)을 다룹니다
