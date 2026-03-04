@@ -179,6 +179,14 @@ secret-*.*
 .playwright-profile/
 
 # ===========================================
+# Project-specific exclusions
+# ===========================================
+vibeclass-materials/
+contents/
+.claude/
+.moai/
+
+# ===========================================
 # Node.js (for docs/Nextra)
 # ===========================================
 node_modules/
